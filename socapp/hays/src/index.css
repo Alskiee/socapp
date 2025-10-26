@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global styles */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* Cute purple/black gradient background */
+body {
+  @apply bg-gradient-to-br from-[#7B68EE] to-[#6A0DAD] text-white;
+}
