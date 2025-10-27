@@ -49,11 +49,11 @@ const Login = () => {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg border border-purple-200">
-              <span className="text-purple-600 font-bold text-2xl">C</span>
+              <span className="text-purple-600 font-bold text-2xl">M</span>
             </div>
           </div>
           <h1 className="text-3xl font-bold text-purple-700 mb-2">Welcome Back</h1>
-          <p className="text-purple-600/80">Sign in to your CSSocial account</p>
+          <p className="text-purple-600/80">Sign in to your CSS Social account</p>
         </div>
 
         {/* Login Card */}

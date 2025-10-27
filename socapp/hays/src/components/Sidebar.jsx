@@ -34,7 +34,7 @@ export default function Sidebar() {
 
   const navItems = [
     { to: '/', icon: FaHome, label: 'Feed', badge: null },
-    { to: '/people', icon: FaUserFriends, label: 'People', badge: null },
+    { to: '/friends', icon: FaUserFriends, label: 'People', badge: null },
     { to: '/chat', icon: FaEnvelope, label: 'Messages', badge: unreadTotal },
     { to: '/notifications', icon: FaBell, label: 'Notifications', badge: notificationsCount },
     { to: '/saved', icon: FaBookmark, label: 'Saved', badge: null },

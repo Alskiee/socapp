@@ -82,7 +82,7 @@ const Register = () => {
               <span className="text-purple-600 font-bold text-2xl">C</span>
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-purple-700 mb-2">Join CSSocial</h1>
+          <h1 className="text-3xl font-bold text-purple-700 mb-2">Join CSS Social</h1>
           <p className="text-purple-600/80">Create your account and start connecting</p>
         </div>
 

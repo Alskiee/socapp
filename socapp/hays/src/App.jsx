@@ -9,6 +9,7 @@ import PostDetails from '@/pages/PostDetails';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import NotFound from '@/pages/NotFound';
 import PeoplePage from '@/pages/PeoplePage';
+import FriendsPage from '@/pages/FriendsPage';
 import ProfilePage from '@/pages/ProfilePage';
 import Chat from '@/pages/Chat';
 import { useAuth } from '@/context/AuthContext';
@@ -22,22 +23,8 @@ function App() {
       {token && <Navbar />}
       <main className={token}>
         <Routes>
-          <Route
-            path="/login"
-            element={
-              <div className="min-h-screen bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600">
-                <Login />
-              </div>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <div className="min-h-screen bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600">
-                <Register />
-              </div>
-            }
-          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Feed />} />
@@ -49,6 +36,7 @@ function App() {
             <Route path="/people" element={<PeoplePage />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/chat/:id" element={<Chat />} />
+            <Route path="/friends" element={<FriendsPage />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
