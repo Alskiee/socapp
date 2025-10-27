@@ -9,9 +9,7 @@ export default defineConfig(({ command }) => ({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  base: '/', // ✅ ensures assets load correctly on Render
-
-  // ✅ proxy only during local development
+  base: '/',
   server: {
     proxy:
       command === 'serve'
