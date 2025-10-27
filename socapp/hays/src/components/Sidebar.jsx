@@ -1,5 +1,13 @@
 import { Link, NavLink } from 'react-router-dom';
-import { FaHome, FaEnvelope, FaUserFriends, FaCog, FaBell, FaBookmark } from 'react-icons/fa';
+import {
+  FaHome,
+  FaSearch,
+  FaEnvelope,
+  FaUserFriends,
+  FaCog,
+  FaBell,
+  FaBookmark,
+} from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Avatar from '@/components/Avatar';
@@ -36,9 +44,9 @@ export default function Sidebar() {
     { to: '/', icon: FaHome, label: 'Feed', badge: null },
     { to: '/friends', icon: FaUserFriends, label: 'People', badge: null },
     { to: '/chat', icon: FaEnvelope, label: 'Messages', badge: unreadTotal },
-    { to: '/notifications', icon: FaBell, label: 'Notifications', badge: notificationsCount },
-    { to: '/saved', icon: FaBookmark, label: 'Saved', badge: null },
-    { to: '/settings', icon: FaCog, label: 'Settings', badge: null },
+    // { to: '/notifications', icon: FaBell, label: 'Notifications', badge: notificationsCount },
+    { to: '/search', icon: FaSearch, label: 'Search', badge: null },
+    // { to: '/settings', icon: FaCog, label: 'Settings', badge: null },
   ];
 
   return (
@@ -105,15 +113,12 @@ export default function Sidebar() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between items-center">
               <span>Posts</span>
-              <span className="font-semibold">24</span>
             </div>
             <div className="flex justify-between items-center">
               <span>Following</span>
-              <span className="font-semibold">156</span>
             </div>
             <div className="flex justify-between items-center">
               <span>Followers</span>
-              <span className="font-semibold">89</span>
             </div>
           </div>
         </div>
