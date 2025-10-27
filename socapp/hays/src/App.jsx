@@ -23,8 +23,22 @@ function App() {
       {token && <Navbar />}
       <main className={token}>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route
+            path="/login"
+            element={
+              <div className="min-h-screen bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600">
+                <Login />
+              </div>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <div className="min-h-screen bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600">
+                <Register />
+              </div>
+            }
+          />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<Feed />} />
