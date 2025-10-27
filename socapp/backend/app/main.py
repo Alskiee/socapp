@@ -16,7 +16,7 @@ app = FastAPI(title="College Social Media Backend")
 # ✅ Add CORS FIRST
 origins = [
     "https://socapp-mu.vercel.app",
-    "https://css-social.onrender.com/"
+    "https://css-social.onrender.com/",
     "https://socapp-2vpg.onrender.com",
     "http://localhost",
     "http://127.0.0.1",
