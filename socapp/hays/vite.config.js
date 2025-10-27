@@ -8,6 +8,9 @@ export default defineConfig(({ command }) => ({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    build: {
+      outDir: 'dist',
+    },
   },
   base: '/',
   server: {
