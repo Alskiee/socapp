@@ -29,7 +29,6 @@ const Login = () => {
       const res = await api.post('/auth/login-with-username', formData);
       const token = res.data.access_token;
       localStorage.setItem('token', token);
-      console.log('✅ Login success:', token);
 
       setTimeout(() => {
         window.location.href = '/';
