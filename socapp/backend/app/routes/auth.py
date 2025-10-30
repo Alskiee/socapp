@@ -117,14 +117,13 @@ def verify_email(token: str):
     <body>
         <div class="success">✅ Email Verified Successfully!</div>
         <div class="message">You can now log in to your account.</div>
-        <a href="/">Return to Home</a>
+        <a href="/css-social.onrender.com">Return to Home</a>
     </body>
     </html>
     """
     
     return HTMLResponse(content=html_content)
 
-# -------------------- RESEND VERIFICATION EMAIL --------------------
 @router.post("/resend-verification")
 async def resend_verification(email: str, background_tasks: BackgroundTasks):
     with db.get_session() as session:
@@ -158,7 +157,6 @@ async def resend_verification(email: str, background_tasks: BackgroundTasks):
 
     return {"message": "Verification email sent successfully!"}
 
-# -------------------- LOGIN (Updated to check email verification) --------------------
 @router.post("/login")
 def login_form(username: str = Form(...), password: str = Form(...)):
     with db.get_session() as session:
@@ -182,7 +180,6 @@ def login_form(username: str = Form(...), password: str = Form(...)):
         token = create_access_token({"sub": username})
         return {"access_token": token, "token_type": "bearer"}
 
-# -------------------- LOGIN (JSON for frontend - Updated) --------------------
 @router.post("/login-with-username")
 def login_json(payload: LoginRequest):
     username = payload.username
@@ -209,14 +206,12 @@ def login_json(payload: LoginRequest):
         token = create_access_token({"sub": username})
         return {"access_token": token, "token_type": "bearer"}
 
-# -------------------- CURRENT USER --------------------
 @router.get("/users/me")
 def current_user(current_user: dict = Depends(get_current_user)):
     current_user.pop("password", None)
     return current_user
 
 
-    """Debug endpoint to check loaded configuration"""
     return {
         "neo4j_uri": settings.NEO4J_URI,
         "neo4j_username": settings.NEO4J_USERNAME,

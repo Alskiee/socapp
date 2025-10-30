@@ -30,7 +30,7 @@ async def send_verification_email(email: str, verification_token: str):
         # Create message
         message = MIMEMultipart("alternative")
         message["Subject"] = "Verify Your Email Address"
-        message["From"] = f"Your App <{sender_email}>"
+        message["From"] = f"Scc Social <{sender_email}>"
         message["To"] = email
         
         # Create HTML content
@@ -54,11 +54,6 @@ async def send_verification_email(email: str, verification_token: str):
                 <p>
                     <a href="{verification_url}" class="button">Verify Email</a>
                 </p>
-                <p>Or copy and paste this link in your browser:</p>
-                <p><code>{verification_url}</code></p>
-                <div class="footer">
-                    <p>If you didn't create an account, please ignore this email.</p>
-                </div>
             </div>
         </body>
         </html>
