@@ -1,8 +1,6 @@
 # email_verification.py
-import smtplib
+import resend
 import os
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import logging
 from dotenv import load_dotenv
 
@@ -10,65 +8,62 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+# Initialize Resend
+resend.api_key = os.getenv("RESEND_API_KEY")
+
 async def send_verification_email(email: str, verification_token: str):
     """
-    Send verification email using Gmail SMTP
+    Send verification email using Resend
     """
     try:
-        # Gmail SMTP configuration
-        smtp_server = "smtp.gmail.com"
-        port = 587
-        sender_email = os.getenv("GMAIL_EMAIL")  # Your Gmail address
-        password = os.getenv("GMAIL_APP_PASSWORD")  # Gmail app password
-        
-        if not sender_email or not password:
-            logger.error("❌ Gmail credentials not configured")
+        # Check if API key is set
+        if not resend.api_key:
+            logger.error("❌ RESEND_API_KEY not found")
             return None
 
-        verification_url = f"https://socapp-2vpg.onrender.com/auth/verify-email?token={verification_token}"
+        base_url = os.getenv("BASE_URL", "https://socapp-2vpg.onrender.com")
+        verification_url = f"{base_url}/auth/verify-email?token={verification_token}"
         
-        # Create message
-        message = MIMEMultipart("alternative")
-        message["Subject"] = "Verify Your Email Address"
-        message["From"] = f"Scc Social <{sender_email}>"
-        message["To"] = email
+        logger.info(f"📧 Attempting to send verification email to: {email}")
         
-        # Create HTML content
-        html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <style>
-                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                .button {{ display: inline-block; padding: 12px 24px; background-color: #007bff; 
-                        color: white; text-decoration: none; border-radius: 4px; }}
-                .footer {{ margin-top: 20px; font-size: 14px; color: #666; }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h2>Verify Your Email Address</h2>
-                <p>Thank you for registering! Please click the button below to verify your email address:</p>
-                <p>
-                    <a href="{verification_url}" class="button">Verify Email</a>
-                </p>
-            </div>
-        </body>
-        </html>
-        """
-        
-        message.attach(MIMEText(html, "html"))
-        
-        # Send email
-        with smtplib.SMTP(smtp_server, port) as server:
-            server.starttls()
-            server.login(sender_email, password)
-            server.sendmail(sender_email, email, message.as_string())
-        
-        logger.info(f"✅ Verification email sent to: {email}")
-        return True
+        params = {
+            "from": "Scc Social <onboarding@resend.dev>",  # Use resend.dev for testing
+            "to": [email],
+            "subject": "Verify Your Email Address",
+            "html": f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                    .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                    .button {{ display: inline-block; padding: 12px 24px; background-color: #007bff; 
+                            color: white; text-decoration: none; border-radius: 4px; }}
+                    .footer {{ margin-top: 20px; font-size: 14px; color: #666; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h2>Verify Your Email Address</h2>
+                    <p>Thank you for registering! Please click the button below to verify your email address:</p>
+                    <p>
+                        <a href="{verification_url}" class="button">Verify Email</a>
+                    </p>
+                    <p>Or copy and paste this link in your browser:</p>
+                    <p><code>{verification_url}</code></p>
+                    <div class="footer">
+                        <p>If you didn't create an account, please ignore this email.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+        }
+
+        email_response = resend.Emails.send(params)
+        logger.info(f"✅ Email sent successfully! Response: {email_response}")
+        return email_response
         
     except Exception as e:
         logger.error(f"❌ Failed to send verification email: {str(e)}")
