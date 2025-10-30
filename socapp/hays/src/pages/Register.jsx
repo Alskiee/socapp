@@ -48,7 +48,9 @@ const Register = () => {
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, formData);
       console.log('Registration success:', response.data);
-      setSuccess('Account created successfully! You can now log in.');
+      setSuccess(
+        'Account created successfully! Please check your email to verify your account before logging in.',
+      );
       setFormData({ username: '', email: '', password: '' });
       setPasswordStrength(0);
     } catch (error) {
