@@ -1,75 +1,90 @@
 # email_verification.py
-import resend
 import os
 import logging
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-# Initialize Resend
-resend.api_key = os.getenv("RESEND_API_KEY")
-
 async def send_verification_email(email: str, verification_token: str):
-    """
-    Send verification email using Resend
-    """
     try:
-        # Check if API key is set
-        if not resend.api_key:
-            logger.error("❌ RESEND_API_KEY not found")
-            return None
+        sg_api_key = os.getenv("SENDGRID_API_KEY")
+        
+        if not sg_api_key:
+            logger.error("❌ SENDGRID_API_KEY not found in environment variables")
+            return False
 
         base_url = os.getenv("BASE_URL", "https://socapp-2vpg.onrender.com")
         verification_url = f"{base_url}/auth/verify-email?token={verification_token}"
         
-        logger.info(f"📧 Attempting to send verification email to: {email}")
+        logger.info(f"📧 Attempting to send email to: {email}")
         
-        params = {
-            "from": "Scc Social <onboarding@resend.dev>",  # Use resend.dev for testing
-            "to": [email],
-            "subject": "Verify Your Email Address",
-            "html": f"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="utf-8">
-                <style>
-                    body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                    .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                    .button {{ display: inline-block; padding: 12px 24px; background-color: #007bff; 
-                            color: white; text-decoration: none; border-radius: 4px; }}
-                    .footer {{ margin-top: 20px; font-size: 14px; color: #666; }}
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h2>Verify Your Email Address</h2>
-                    <p>Thank you for registering! Please click the button below to verify your email address:</p>
-                    <p>
-                        <a href="{verification_url}" class="button">Verify Email</a>
-                    </p>
-                    <p>Or copy and paste this link in your browser:</p>
-                    <p><code>{verification_url}</code></p>
-                    <div class="footer">
-                        <p>If you didn't create an account, please ignore this email.</p>
-                    </div>
+        # Create message with plain text alternative
+        message = Mail(
+            from_email='muddihilm58@gmail.com',
+            to_emails=email,
+            subject='Verify Your Email Address - Scc Social',
+            html_content=f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #333;">Welcome to Scc Social! 🎉</h2>
+                <p>Thank you for registering! Please verify your email address to activate your account.</p>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{verification_url}" 
+                       style="background-color: #007bff; color: white; padding: 12px 24px; 
+                              text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Verify Email Address
+                    </a>
                 </div>
-            </body>
-            </html>
+                
+                <p style="color: #666; font-size: 14px;">
+                    Or copy and paste this link in your browser:<br>
+                    <code style="background: #f5f5f5; padding: 5px; border-radius: 3px; word-break: break-all;">{verification_url}</code>
+                </p>
+            </div>
+            """,
+            plain_text_content=f"""
+            Welcome to Scc Social!
+            
+            Thank you for registering! Please verify your email address to activate your account.
+            
+            Verify your email by clicking this link:
+            {verification_url}
+            
+            If the button doesn't work, copy and paste the above URL into your web browser.
             """
-        }
-
-        email_response = resend.Emails.send(params)
-        logger.info(f"✅ Email sent successfully! Response: {email_response}")
-        return email_response
+        )
         
+        # Send with detailed response logging
+        sg = SendGridAPIClient(sg_api_key)
+        response = sg.send(message)
+        
+        # Log the complete response
+        logger.info(f"✅ Email sent! Status Code: {response.status_code}")
+        logger.info(f"📨 Response Body: {response.body}")
+        logger.info(f"📋 Response Headers: {dict(response.headers)}")
+        
+        # Check for specific status codes
+        if response.status_code in [200, 202]:
+            logger.info("🎯 Email accepted for delivery by SendGrid")
+            return True
+        else:
+            logger.error(f"❌ SendGrid returned status: {response.status_code}")
+            logger.error(f"❌ Response body: {response.body}")
+            return False
+            
     except Exception as e:
-        logger.error(f"❌ Failed to send verification email: {str(e)}")
-        return None
+        logger.error(f"❌ SendGrid error: {str(e)}")
+        # Log more specific error details
+        if hasattr(e, 'body'):
+            logger.error(f"❌ Error body: {e.body}")
+        if hasattr(e, 'headers'):
+            logger.error(f"❌ Error headers: {e.headers}")
+        return False
 
 def generate_verification_token():
-    """Generate a unique verification token"""
     import secrets
     return secrets.token_urlsafe(32)

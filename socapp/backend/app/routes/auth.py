@@ -66,13 +66,29 @@ async def register(user: UserCreate, background_tasks: BackgroundTasks):
             created_at=datetime.datetime.utcnow().isoformat()
         )
 
-    # Send verification email in background
-    background_tasks.add_task(send_verification_email, user.email, verification_token)
+    # Send verification email in background with better error handling
+    background_tasks.add_task(send_verification_email_with_logging, user.email, verification_token)
 
     return {
         "message": "Registration successful! Please check your email to verify your account.",
         "user_id": user_id
     }
+
+# Add this helper function to auth.py
+async def send_verification_email_with_logging(email: str, token: str):
+    """Wrapper function with better logging for background tasks"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"🎯 Starting background email send to: {email}")
+    result = await send_verification_email(email, token)
+    
+    if result:
+        logger.info(f"✅ Background email sent successfully to: {email}")
+    else:
+        logger.error(f"❌ Background email failed to send to: {email}")
+    
+    return result
 
 # -------------------- VERIFY EMAIL --------------------
 @router.get("/verify-email")
@@ -220,3 +236,92 @@ def current_user(current_user: dict = Depends(get_current_user)):
         "database": settings.NEO4J_DATABASE,
         "has_password": bool(settings.NEO4J_PASSWORD)
     }
+
+
+from pydantic import BaseModel
+
+class TestEmailRequest(BaseModel):
+    email: str
+    
+@router.get("/debug-sendgrid")
+async def debug_sendgrid():
+    """Check SendGrid configuration"""
+    import os
+    
+    sg_api_key = os.getenv("SENDGRID_API_KEY")
+    base_url = os.getenv("BASE_URL")
+    gmail_email = os.getenv("GMAIL_EMAIL")
+    
+    return {
+        "sendgrid_configured": bool(sg_api_key),
+        "api_key_length": len(sg_api_key) if sg_api_key else 0,
+        "api_key_prefix": sg_api_key[:10] + "..." if sg_api_key and len(sg_api_key) > 10 else "None",
+        "base_url": base_url,
+        "gmail_email_configured": bool(gmail_email),
+        "environment": "production" if "render.com" in str(base_url) else "development"
+    }
+
+# ADD THIS MISSING ENDPOINT:
+@router.post("/test-sendgrid")
+async def test_sendgrid(email: str):
+    """Test SendGrid with POST request"""
+    test_token = generate_verification_token()
+    
+    try:
+        result = await send_verification_email(email, test_token)
+        if result:
+            return {
+                "message": "✅ SendGrid test email sent successfully!",
+                "token": test_token,
+                "email": email
+            }
+        else:
+            return {
+                "message": "❌ SendGrid test failed - check logs",
+                "token": test_token,
+                "email": email
+            }
+    except Exception as e:
+        return {
+            "message": f"❌ SendGrid error: {str(e)}",
+            "token": test_token,
+            "email": email
+        }
+    """Check SendGrid configuration"""
+    import os
+    
+    sg_api_key = os.getenv("SENDGRID_API_KEY")
+    base_url = os.getenv("BASE_URL")
+    gmail_email = os.getenv("GMAIL_EMAIL")
+    
+    return {
+        "sendgrid_configured": bool(sg_api_key),
+        "api_key_length": len(sg_api_key) if sg_api_key else 0,
+        "api_key_prefix": sg_api_key[:10] + "..." if sg_api_key and len(sg_api_key) > 10 else "None",
+        "base_url": base_url,
+        "gmail_email_configured": bool(gmail_email),
+        "environment": "production" if "render.com" in str(base_url) else "development"
+    }
+    """Test SendGrid with GET request"""
+    test_token = generate_verification_token()
+    
+    try:
+        result = await send_verification_email(email, test_token)
+        if result:
+            return {
+                "message": "✅ SendGrid test email sent successfully!",
+                "token": test_token,
+                "email": email
+            }
+        else:
+            return {
+                "message": "❌ SendGrid test failed - check logs",
+                "token": test_token,
+                "email": email
+            }
+    except Exception as e:
+        return {
+            "message": f"❌ SendGrid error: {str(e)}",
+            "token": test_token,
+            "email": email
+        }
