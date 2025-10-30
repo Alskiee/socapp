@@ -127,7 +127,7 @@ def verify_email(token: str):
             verified_at=datetime.datetime.utcnow().isoformat()
         )
 
-    # Return HTML response for browser
+    # Return HTML response that redirects to frontend
     html_content = """
     <!DOCTYPE html>
     <html>
@@ -137,18 +137,34 @@ def verify_email(token: str):
             body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
             .success { color: green; font-size: 24px; }
             .message { margin: 20px 0; }
+            .button { 
+                display: inline-block; 
+                background-color: #007bff; 
+                color: white; 
+                padding: 12px 24px; 
+                text-decoration: none; 
+                border-radius: 5px; 
+                margin-top: 20px;
+            }
         </style>
     </head>
     <body>
         <div class="success">✅ Email Verified Successfully!</div>
         <div class="message">You can now log in to your account.</div>
-        <a href="/https://css-social.onrender.com">Return to Home</a>
+        <a href="https://css-social.onrender.com/login" class="button">Go to Login</a>
+        <script>
+            // Optional: Auto-redirect after 3 seconds
+            setTimeout(function() {
+                window.location.href = "https://css-social.onrender.com/login";
+            }, 3000);
+        </script>
     </body>
     </html>
     """
     
     return HTMLResponse(content=html_content)
 
+    
 @router.post("/resend-verification")
 async def resend_verification(email: str, background_tasks: BackgroundTasks):
     with db.get_session() as session:
