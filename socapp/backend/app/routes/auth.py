@@ -14,7 +14,6 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-# -------------------- Schemas --------------------
 class UserCreate(BaseModel):
     username: str
     email: str
@@ -30,16 +29,13 @@ class VerifyEmailRequest(BaseModel):
 
 async def send_verification_email_with_delay(email: str, verification_token: str):
     """Send email with delay to avoid rate limiting"""
-    # Add 2-second delay between emails
     await asyncio.sleep(2)
     return await send_verification_email(email, verification_token)
 
     
-# -------------------- REGISTER (with email verification) --------------------
 @router.post("/register")
 async def register(user: UserCreate, background_tasks: BackgroundTasks):
     with db.get_session() as session:
-        # Check if user already exists
         existing = session.run(
             "MATCH (u:User) WHERE u.email=$email OR u.username=$username RETURN u",
             email=user.email,
@@ -53,7 +49,6 @@ async def register(user: UserCreate, background_tasks: BackgroundTasks):
         hashed_pw = get_password_hash(user.password)
         verification_token = generate_verification_token()
         
-        # Set email_verified to False by default
         session.run(
             """
             CREATE (u:User {
@@ -75,7 +70,6 @@ async def register(user: UserCreate, background_tasks: BackgroundTasks):
             created_at=datetime.datetime.utcnow().isoformat()
         )
 
-    # Send verification email in background with better error handling
     background_tasks.add_task(send_verification_email_with_delay, user.email, verification_token)
 
     return {
@@ -83,8 +77,6 @@ async def register(user: UserCreate, background_tasks: BackgroundTasks):
         "user_id": user_id
     }
 
-# Add this helper function to auth.py
-async def send_verification_email_with_logging(email: str, token: str):
     """Wrapper function with better logging for background tasks"""
     import logging
     logger = logging.getLogger(__name__)
@@ -99,12 +91,10 @@ async def send_verification_email_with_logging(email: str, token: str):
     
     return result
 
-# -------------------- VERIFY EMAIL --------------------
 @router.get("/verify-email")
 def verify_email(token: str):
     """Verify email using GET request (for browser links)"""
     with db.get_session() as session:
-        # Find user with the verification token
         result = session.run(
             "MATCH (u:User {verification_token: $token}) RETURN u",
             token=token
@@ -115,7 +105,6 @@ def verify_email(token: str):
 
         user_data = result["u"]
         
-        # Update user to mark email as verified and remove verification token
         session.run(
             """
             MATCH (u:User {verification_token: $token})
@@ -127,7 +116,6 @@ def verify_email(token: str):
             verified_at=datetime.datetime.utcnow().isoformat()
         )
 
-    # Return HTML response that redirects to frontend
     html_content = """
     <!DOCTYPE html>
     <html>
@@ -168,7 +156,6 @@ def verify_email(token: str):
 @router.post("/resend-verification")
 async def resend_verification(email: str, background_tasks: BackgroundTasks):
     with db.get_session() as session:
-        # Find user by email
         result = session.run(
             "MATCH (u:User {email: $email}) RETURN u",
             email=email
@@ -179,21 +166,17 @@ async def resend_verification(email: str, background_tasks: BackgroundTasks):
 
         user_data = result["u"]
         
-        # Check if email is already verified
         if user_data.get("email_verified", False):
             raise HTTPException(status_code=400, detail="Email is already verified")
 
-        # Generate new verification token
         new_token = generate_verification_token()
         
-        # Update verification token
         session.run(
             "MATCH (u:User {email: $email}) SET u.verification_token = $token",
             email=email,
             token=new_token
         )
 
-    # Send new verification email
     background_tasks.add_task(send_verification_email, email, new_token)
 
     return {"message": "Verification email sent successfully!"}
@@ -211,7 +194,6 @@ def login_form(username: str = Form(...), password: str = Form(...)):
 
         user_data = record["u"]
         
-        # Check if email is verified
         if not user_data.get("email_verified", False):
             raise HTTPException(
                 status_code=403, 
@@ -237,7 +219,6 @@ def login_json(payload: LoginRequest):
 
         user_data = record["u"]
         
-        # Check if email is verified
         if not user_data.get("email_verified", False):
             raise HTTPException(
                 status_code=403, 
@@ -262,33 +243,6 @@ def current_user(current_user: dict = Depends(get_current_user)):
         "has_password": bool(settings.NEO4J_PASSWORD)
     }
 
-
-from pydantic import BaseModel
-
-class TestEmailRequest(BaseModel):
-    email: str
-    
-@router.get("/debug-sendgrid")
-async def debug_sendgrid():
-    """Check SendGrid configuration"""
-    import os
-    
-    sg_api_key = os.getenv("SENDGRID_API_KEY")
-    base_url = os.getenv("BASE_URL")
-    gmail_email = os.getenv("GMAIL_EMAIL")
-    
-    return {
-        "sendgrid_configured": bool(sg_api_key),
-        "api_key_length": len(sg_api_key) if sg_api_key else 0,
-        "api_key_prefix": sg_api_key[:10] + "..." if sg_api_key and len(sg_api_key) > 10 else "None",
-        "base_url": base_url,
-        "gmail_email_configured": bool(gmail_email),
-        "environment": "production" if "render.com" in str(base_url) else "development"
-    }
-
-# ADD THIS MISSING ENDPOINT:
-@router.post("/test-sendgrid")
-async def test_sendgrid(email: str):
     """Test SendGrid with POST request"""
     test_token = generate_verification_token()
     

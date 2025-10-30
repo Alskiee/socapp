@@ -22,7 +22,6 @@ async def send_verification_email(email: str, verification_token: str):
         
         logger.info(f"📧 Attempting to send email to: {email}")
         
-        # Create message with plain text alternative
         message = Mail(
             from_email='muddihilm58@gmail.com',
             to_emails=email,
@@ -58,16 +57,13 @@ async def send_verification_email(email: str, verification_token: str):
             """
         )
         
-        # Send with detailed response logging
         sg = SendGridAPIClient(sg_api_key)
         response = sg.send(message)
         
-        # Log the complete response
         logger.info(f"✅ Email sent! Status Code: {response.status_code}")
         logger.info(f"📨 Response Body: {response.body}")
         logger.info(f"📋 Response Headers: {dict(response.headers)}")
         
-        # Check for specific status codes
         if response.status_code in [200, 202]:
             logger.info("🎯 Email accepted for delivery by SendGrid")
             return True
@@ -78,7 +74,6 @@ async def send_verification_email(email: str, verification_token: str):
             
     except Exception as e:
         logger.error(f"❌ SendGrid error: {str(e)}")
-        # Log more specific error details
         if hasattr(e, 'body'):
             logger.error(f"❌ Error body: {e.body}")
         if hasattr(e, 'headers'):
