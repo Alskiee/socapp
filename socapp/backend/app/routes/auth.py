@@ -76,7 +76,6 @@ async def register(user: UserCreate, background_tasks: BackgroundTasks):
     }
 
 async def send_verification_email_with_logging(email: str, token: str):
-    """Wrapper function with better logging for background tasks"""
     import logging
     logger = logging.getLogger(__name__)
     
@@ -92,7 +91,6 @@ async def send_verification_email_with_logging(email: str, token: str):
 
 @router.get("/verify-email")
 def verify_email(token: str):
-    """Verify email using GET request (for browser links)"""
     with db.get_session() as session:
         result = session.run(
             "MATCH (u:User {verification_token: $token}) RETURN u",
@@ -242,7 +240,6 @@ def current_user(current_user: dict = Depends(get_current_user)):
         "has_password": bool(settings.NEO4J_PASSWORD)
     }
 
-    """Check SendGrid configuration"""
     import os
     
     sg_api_key = os.getenv("SENDGRID_API_KEY")

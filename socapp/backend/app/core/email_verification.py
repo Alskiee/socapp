@@ -25,10 +25,10 @@ async def send_verification_email(email: str, verification_token: str):
         message = Mail(
             from_email='muddihilm58@gmail.com',
             to_emails=email,
-            subject='Verify Your Email Address - Scc Social',
+            subject='Verify Your Email Address - Css Social',
             html_content=f"""
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #333;">Welcome to Scc Social! 🎉</h2>
+                <h2 style="color: #333;">Welcome to Css Social! 🎉</h2>
                 <p>Thank you for registering! Please verify your email address to activate your account.</p>
                 
                 <div style="text-align: center; margin: 30px 0;">
@@ -46,7 +46,7 @@ async def send_verification_email(email: str, verification_token: str):
             </div>
             """,
             plain_text_content=f"""
-            Welcome to Scc Social!
+            Welcome to Css Social!
             
             Thank you for registering! Please verify your email address to activate your account.
             
