@@ -26,9 +26,7 @@ class LoginRequest(BaseModel):
 class VerifyEmailRequest(BaseModel):
     token: str
 
-
 async def send_verification_email_with_delay(email: str, verification_token: str):
-    """Send email with delay to avoid rate limiting"""
     await asyncio.sleep(2)
     return await send_verification_email(email, verification_token)
 
@@ -77,6 +75,7 @@ async def register(user: UserCreate, background_tasks: BackgroundTasks):
         "user_id": user_id
     }
 
+async def send_verification_email_with_logging(email: str, token: str):
     """Wrapper function with better logging for background tasks"""
     import logging
     logger = logging.getLogger(__name__)
@@ -243,29 +242,6 @@ def current_user(current_user: dict = Depends(get_current_user)):
         "has_password": bool(settings.NEO4J_PASSWORD)
     }
 
-    """Test SendGrid with POST request"""
-    test_token = generate_verification_token()
-    
-    try:
-        result = await send_verification_email(email, test_token)
-        if result:
-            return {
-                "message": "✅ SendGrid test email sent successfully!",
-                "token": test_token,
-                "email": email
-            }
-        else:
-            return {
-                "message": "❌ SendGrid test failed - check logs",
-                "token": test_token,
-                "email": email
-            }
-    except Exception as e:
-        return {
-            "message": f"❌ SendGrid error: {str(e)}",
-            "token": test_token,
-            "email": email
-        }
     """Check SendGrid configuration"""
     import os
     
@@ -281,26 +257,3 @@ def current_user(current_user: dict = Depends(get_current_user)):
         "gmail_email_configured": bool(gmail_email),
         "environment": "production" if "render.com" in str(base_url) else "development"
     }
-    """Test SendGrid with GET request"""
-    test_token = generate_verification_token()
-    
-    try:
-        result = await send_verification_email(email, test_token)
-        if result:
-            return {
-                "message": "✅ SendGrid test email sent successfully!",
-                "token": test_token,
-                "email": email
-            }
-        else:
-            return {
-                "message": "❌ SendGrid test failed - check logs",
-                "token": test_token,
-                "email": email
-            }
-    except Exception as e:
-        return {
-            "message": f"❌ SendGrid error: {str(e)}",
-            "token": test_token,
-            "email": email
-        }
