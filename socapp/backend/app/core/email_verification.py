@@ -25,7 +25,7 @@ async def send_verification_email(email: str, verification_token: str):
             logger.error("❌ Gmail credentials not configured")
             return None
 
-        verification_url = f"http://localhost:8000/auth/verify-email?token={verification_token}"
+        verification_url = f"https://socapp-2vpg.onrender.com/auth/verify-email?token={verification_token}"
         
         # Create message
         message = MIMEMultipart("alternative")
