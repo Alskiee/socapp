@@ -117,7 +117,7 @@ def verify_email(token: str):
     <body>
         <div class="success">✅ Email Verified Successfully!</div>
         <div class="message">You can now log in to your account.</div>
-        <a href="/css-social.onrender.com">Return to Home</a>
+        <a href="/https://css-social.onrender.com">Return to Home</a>
     </body>
     </html>
     """
