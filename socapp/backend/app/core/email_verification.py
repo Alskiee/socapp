@@ -17,14 +17,14 @@ async def send_verification_email(email: str, verification_token: str):
             logger.error("❌ SENDGRID_API_KEY not found in environment variables")
             return False
 
-        base_url = os.getenv("BASE_URL", "https://socapp-2vpg.onrender.com")
+        base_url = "https://socapp-2vpg.onrender.com"
         verification_url = f"{base_url}/auth/verify-email?token={verification_token}"
         
         logger.info(f"📧 Attempting to send email to: {email}")
         
-        # Create message with plain text alternative
+        # FIX: Use a SendGrid verified single sender instead of Gmail
         message = Mail(
-            from_email='muddihilm58@gmail.com',
+            from_email='noreply@socapp.com',  # Change this to a verified domain
             to_emails=email,
             subject='Verify Your Email Address - Scc Social',
             html_content=f"""
@@ -58,16 +58,12 @@ async def send_verification_email(email: str, verification_token: str):
             """
         )
         
-        # Send with detailed response logging
+        # Send email
         sg = SendGridAPIClient(sg_api_key)
         response = sg.send(message)
         
-        # Log the complete response
         logger.info(f"✅ Email sent! Status Code: {response.status_code}")
-        logger.info(f"📨 Response Body: {response.body}")
-        logger.info(f"📋 Response Headers: {dict(response.headers)}")
         
-        # Check for specific status codes
         if response.status_code in [200, 202]:
             logger.info("🎯 Email accepted for delivery by SendGrid")
             return True
@@ -78,13 +74,7 @@ async def send_verification_email(email: str, verification_token: str):
             
     except Exception as e:
         logger.error(f"❌ SendGrid error: {str(e)}")
-        # Log more specific error details
-        if hasattr(e, 'body'):
-            logger.error(f"❌ Error body: {e.body}")
-        if hasattr(e, 'headers'):
-            logger.error(f"❌ Error headers: {e.headers}")
         return False
-
 def generate_verification_token():
     import secrets
     return secrets.token_urlsafe(32)

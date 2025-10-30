@@ -8,6 +8,7 @@ from fastapi.security import OAuth2PasswordBearer
 from app.core.email_verification import send_verification_email, generate_verification_token
 import datetime
 import logging
+import asyncio
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -26,6 +27,14 @@ class LoginRequest(BaseModel):
 class VerifyEmailRequest(BaseModel):
     token: str
 
+
+async def send_verification_email_with_delay(email: str, verification_token: str):
+    """Send email with delay to avoid rate limiting"""
+    # Add 2-second delay between emails
+    await asyncio.sleep(2)
+    return await send_verification_email(email, verification_token)
+
+    
 # -------------------- REGISTER (with email verification) --------------------
 @router.post("/register")
 async def register(user: UserCreate, background_tasks: BackgroundTasks):
@@ -67,7 +76,7 @@ async def register(user: UserCreate, background_tasks: BackgroundTasks):
         )
 
     # Send verification email in background with better error handling
-    background_tasks.add_task(send_verification_email_with_logging, user.email, verification_token)
+    background_tasks.add_task(send_verification_email_with_delay, user.email, verification_token)
 
     return {
         "message": "Registration successful! Please check your email to verify your account.",
